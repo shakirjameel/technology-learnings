@@ -1,0 +1,81 @@
+DevOps in DMP
+
+-	Tools used –
+  o	Jenkins
+  o	Telegraph
+  o	Graphana
+  o	Pagertree
+-	Technology –
+  o	Docker
+
+Jenkins 	
+-	Jenkins Setup 
+  o	Master Slave architecture 
+  o	Master – where Jenkins-aid is running – also master can deploy too – Jenkins-aid master has 5 agents.
+  o	Different between agents and slaves?
+    	Agent is a kind of Jenkins Process
+  o	Specific to DMP – 
+    	Who owns the master? – Not us
+    	Do we have specific slaves we own? – Not us – We use docker build node slave which is shared. 
+
+-	Jenkins Deployment/Run Strategy 
+  o	If no agent is specified, the deployment will run on any available node
+  o	Global Tool Configuration – Defines the path and tool name
+  o	Declarative: Tool install – uses the name defined in Global Tool Configuration for installation during deployment.
+  o	Fun Fact - Declarative Tool install downloads and installs everything mentioned and deletes it post the deployment – This deletion is managed by Jenkins
+  o	Configure System
+  o	Symlinks/Links
+  o	Fun Fact - Docker inside Docker is very slow
+
+-	Initialization
+  o	Mulitbranch Pipeline setup
+  o	Regex identifier to fetch the branch
+  o	Git Credential attached for pull access
+    	Clean before checkout – Clean workspace before Git Pull
+
+-	Deploy the code
+  o	Jenkinsfile – written in Groovy
+    	Env variables – BRANCH_NAME etc., are automatically defined in Jenkins
+    	Container file directory names 
+    	Container directory paths
+    	Docker Image URI
+    	Pipeline – Agent – Tools – Stages – Script – Dir (cd) – sh
+  o	emailText for managing failure emails – developers() is an inbuilt function that fetches the users who make the last commit
+  deploy.py
+    -	Python file deployed in the target deployment machine (dev/tst/prd)
+    -	Technically pulls and runs the image pushed by Jenkins on the deployment machine 
+
+Telegraph
+  -	TOML for defining telegraf configs
+  -	Service Based Conf File
+  o	Process Divided into three parts – 1 – Input , 2 – Output , 3 – Process Override
+    	Input
+      •	Defines what metrics to be collected and from where (logs)
+    	Output 
+      •	Defines where the data needs to be dumped
+    	Processing 
+      •	Overrides that define/assign –
+      o	Info/Debug number assignment for graph and dropdowns
+      •	Adding a new tag for service name
+      •	Overwriting the measurements tag with DMP_LOG value
+  -	Other Plugins Conf File
+    o	Custom Plugins to manage dashboards of system memory/CPU etc.
+    	Cpu, memory/disk
+    o	Custom Plugins to manage dashboard for containers memory/CPU etc.
+    	Docker plugins
+    o	Statsd – TCP/UDP Plugin
+    -	Deployment of Telegraph conf
+    o	Install Telegraph
+    o	Yum Install
+    	Creates two directories
+    •	/etc/default/telegraph – Constants File 
+    •	/etc/telegraph – Service and other conf files
+  -	Running of Telegraph conf
+    o	System ctl start/stop/status/restart telegraph – You’d be able to install RPM as services
+Graphana
+  -	Write queries to create graphs – Type – influx DB queries
+  -	Shared Influx BD across all project
+Pagertree
+  -	Configured using the Alerts on Graphana
+  -	These alerts are sent to Pagertree which are configured to users which are mapped to a team
+There are a lot of initial configurations in relation to Telegraph and PagerTree on Graphana that  Jordan took care of. They are still a mystery to us. 
