@@ -1,0 +1,8 @@
+Facts –
+  •	Unix has separate group and user management.
+  o	Users are managed in /etc/passwd and Groups are managed in /etc/groups
+    •	However, in out case the management happens through nsswitch.conf (nss stands for “name service switch)
+  o	It has keys for psswd and groups that have the value “file ldap”
+  o	These files can be looked-up in  /etc/openldap/ldap.conf
+    •	The groups that can access the machine are defined in /etc/security/access.conf
+  o	Format of adding entry is permission:user/groups:origin
